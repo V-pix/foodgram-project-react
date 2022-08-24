@@ -105,7 +105,7 @@ class Favorites(models.Model):
     )
 
 
-class Shopping_cart(models.Model):
+class ShoppingCart(models.Model):
     user = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
