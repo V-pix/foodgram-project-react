@@ -8,9 +8,16 @@ class Tag(models.Model):
         max_length=200,
         verbose_name='Название тега',
         help_text='Проверьте название тега',
+        unique=True,
     )
-    color = ColorField(default='#FF0000')
+    color = ColorField(
+        default='#FF0000',
+        unique=True,
+    )
     slug = models.SlugField(unique=True)
+
+    def __str__(self):
+        return self.name
 
 
 class Ingredient(models.Model):
@@ -31,7 +38,7 @@ class Recipe(models.Model):
         CustomUser,
         on_delete=models.CASCADE,
         related_name='recipe',
-        verbose_name="Автор",
+        verbose_name='Автор',
     )
     name = models.CharField(
         max_length=200,
@@ -62,6 +69,11 @@ class Recipe(models.Model):
         verbose_name='Время приготовления блюда',
         help_text='Укажите время приготовления блюда',
     )
+    pub_date = models.DateTimeField(
+        verbose_name='Дата публикации',
+        auto_now_add=True,
+        db_index=True,
+    )
 
     class Meta:
         ordering = ('-pub_date',)
@@ -69,7 +81,7 @@ class Recipe(models.Model):
         verbose_name_plural = 'Рецепты'
 
     def __str__(self):
-        return self.text
+        return self.name
 
 
 class RecipeIngredients(models.Model):

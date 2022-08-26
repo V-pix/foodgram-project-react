@@ -56,7 +56,19 @@ class CustomUser(AbstractUser):
 
     @property
     def is_admin(self):
-        return self.is_superuser or self.role == "admin" or self.is_staff
+        return self.is_superuser or self.role == 'admin' or self.is_staff
 
 
-class Subscribtion()
+class Subscribtion(models.Model):
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='subscriber',
+        verbose_name='Подписчик',
+    )
+    author = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='subscribing',
+        verbose_name='Автор',
+    )

@@ -4,3 +4,5 @@ pytz==2022.2.1
 sqlparse==0.4.2
 django-colorfield==0.7.2
 Pillow==9.2.0
+djoser
+djangorestframework-simplejwt==4.7.2
