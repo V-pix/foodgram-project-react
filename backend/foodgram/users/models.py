@@ -19,7 +19,7 @@ class CustomUser(AbstractUser):
     )
     email = models.EmailField(
         max_length=254,
-        verbose_name='Почта',
+        verbose_name='Адрес электронной почты',
         help_text='Укажите Email',
         unique=True,
     )
@@ -36,7 +36,7 @@ class CustomUser(AbstractUser):
     )
     last_name = models.TextField(
         max_length=150,
-        verbose_name='Имя пользователя',
+        verbose_name='Фамилия пользователя',
         help_text='Укажите фамилию',
     )
     password = models.CharField(
@@ -44,6 +44,13 @@ class CustomUser(AbstractUser):
         verbose_name='Пароль пользователя',
         help_text='Придумайте пароль',
     )
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = [
+        'username',
+        'first_name',
+        'last_name',
+    ]
 
     class Meta:
         constraints = [

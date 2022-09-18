@@ -19,7 +19,7 @@ class TagSerializer(serializers.ModelSerializer):
 class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
-        fields = ('id', 'name', 'measure_unit')
+        fields = ('id', 'name', 'measure_unit',)
 
 
 class RecipeIngredientsSerializer(serializers.ModelSerializer):

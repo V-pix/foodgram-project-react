@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from djoser.views import UserViewSet
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -13,7 +14,8 @@ from users.serializers import (
     ObtainTokenSerializer,
     RegistrationSerializer,
 )
-from users.utils import confirmation_generator
+
+# from users.utils import confirmation_generator
 
 
 class UserRegistrationView(APIView):
@@ -24,7 +26,7 @@ class UserRegistrationView(APIView):
         if serializer.is_valid():
             serializer.save()
             username = request.data.get('username')
-            confirmation_generator(username)
+            # confirmation_generator(username)
             return Response(
                 serializer.data,
                 status=status.HTTP_200_OK
@@ -58,20 +60,20 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     permission_classes = (AllowAny,)
     lookup_field = 'username'
 
-    @action(
-        methods=['GET', 'PATCH'],
-        detail=False,
-        permission_classes=[permissions.IsAuthenticated],
-    )
-    def me(self, request):
-        serializer = CustomUserSerializer(request.user)
-        if request.method == 'PATCH':
-            serializer = CustomUserSerializer(
-                request.user,
-                data=request.data,
-                partial=True
-            )
-            if serializer.is_valid():
-                serializer.validated_data['role'] = request.user.role
-                serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    # @action(
+    # methods=['GET', 'PATCH'],
+    # detail=False,
+    # permission_classes=[permissions.IsAuthenticated],
+    # )
+    # def me(self, request):
+    # serializer = CustomUserSerializer(request.user)
+    # if request.method == 'PATCH':
+    # serializer = CustomUserSerializer(
+    # request.user,
+    # data=request.data,
+    # partial=True
+    # )
+    # if serializer.is_valid():
+    # serializer.validated_data['role'] = request.user.role
+    # serializer.save()
+    # return Response(serializer.data, status=status.HTTP_200_OK)

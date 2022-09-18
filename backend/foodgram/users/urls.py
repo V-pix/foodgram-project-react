@@ -9,10 +9,12 @@ router = DefaultRouter()
 router.register(r'users', CustomUserViewSet, basename='users')
 
 urlpatterns = [
-    path('', include(router.urls)),
-    path('auth/signup/', UserRegistrationView.as_view(), name='signup'),
-    path('auth/token/login/', AuthTokenView.as_view(), name='auth'),
+    # path('auth/signup/', UserRegistrationView.as_view(), name='signup'),
+    # path('auth/token/login/', AuthTokenView.as_view(), name='auth'),
     path('', include('djoser.urls')),
+    # url(r'^auth/', include('djoser.urls')),
+    path('auth/', include('djoser.urls.authtoken')),
+    path('', include(router.urls)),
     # path('auth/', include('djoser.urls.jwt')),
     # path('users/subscriptions/'),
     # path('users/set_password/'),
