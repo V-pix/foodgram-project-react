@@ -6,3 +6,4 @@ django-colorfield==0.7.2
 Pillow==9.2.0
 djoser
 djangorestframework-simplejwt==4.7.2
+django-filter==22.1

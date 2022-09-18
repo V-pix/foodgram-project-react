@@ -61,9 +61,10 @@ class Recipe(models.Model):
         verbose_name='Ингредиенты блюда',
         help_text='Выберете ингридиенты',
     )
-    tags = models.ForeignKey(
+    tags = models.ManyToManyField(
         Tag,
-        on_delete=models.CASCADE
+        related_name='recipe',
+        help_text='Выберите тэг',
     )
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления блюда',
