@@ -1,18 +1,19 @@
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
-from rest_framework import permissions, status, viewsets
+from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from users.models import CustomUser
+from users.models import CustomUser, Subscribtion
 from users.permissions import AdminPermission
 from users.serializers import (
     CustomUserSerializer,
     ObtainTokenSerializer,
     RegistrationSerializer,
+    SubscribtionSerializer,
 )
 
 # from users.utils import confirmation_generator
@@ -77,3 +78,20 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     # serializer.validated_data['role'] = request.user.role
     # serializer.save()
     # return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class SubscribtionViewSet(viewsets.ModelViewSet):
+    queryset = Subscribtion.objects.all()
+    serializer_class = SubscribtionSerializer
+    # permission_classes = (AdminPermission,)
+    filter_backends = (filters.SearchFilter,)
+    filterset_fields = ('user', 'author')
+    search_fields = ('author__username',)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def get_queryset(self):
+        user = get_object_or_404(
+            CustomUser, username=self.request.user.username)
+        return user.subscriber.all()
