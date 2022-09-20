@@ -56,6 +56,7 @@ class Recipe(models.Model):
     )
     ingredients = models.ManyToManyField(
         Ingredient,
+        # through='RecipeIngredients',
         related_name='recipe',
         blank=True,
         verbose_name='Ингредиенты блюда',
@@ -63,6 +64,7 @@ class Recipe(models.Model):
     )
     tags = models.ManyToManyField(
         Tag,
+        # through='RecipeTags',
         related_name='recipe',
         verbose_name='Тэг блюда',
         help_text='Выберите тэг',
@@ -91,18 +93,27 @@ class RecipeIngredients(models.Model):
         verbose_name='Количество ингредиента',
         help_text='Укажите Количество ингредиента',
     )
-    ingredients = models.ManyToManyField(
+    ingredients = models.ForeignKey(
         Ingredient,
+        on_delete=models.CASCADE,
         related_name='recipe_ingredients',
-        blank=True,
         verbose_name='Ингредиенты блюда',
         help_text='Выберете ингридиенты',
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='recipe_ingredients'
+        related_name='recipe_ingredients',
+        verbose_name='Рецепт блюда',
+        help_text='Опишите рецепт',
     )
+
+
+class RecipeTags(models.Model):
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE,
+                            related_name='recipe_tags')
+    recipe = models.ForeignKey(
+        Recipe, on_delete=models.CASCADE, related_name='recipe_tags')
 
 
 class Favorites(models.Model):
