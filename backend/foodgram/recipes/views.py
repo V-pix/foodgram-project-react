@@ -24,7 +24,7 @@ from recipes.serializers import (
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    serializer_class = RecipeSerializer
+    serializer_class = RecipeSerializer, many = True
     permission_classes = (AllowAny,)
 
 

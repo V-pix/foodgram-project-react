@@ -56,7 +56,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('author', 'name', 'image', 'text', 'ingredients',
-                  'tags', 'cooking_time', 'pub_date')
+                  'tags', 'cooking_time', 'pub_date', 'recipe_ingredients', )
         read_only_fields = ('author',)
 
     def create(self, validated_data):
