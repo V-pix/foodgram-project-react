@@ -7,14 +7,19 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('recipes', '0005_alter_recipe_tags'),
+        ("recipes", "0005_alter_recipe_tags"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='recipeingredients',
-            name='_ingredient',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, related_name='recipe_ingredient', to='recipes.ingredient'),
+            model_name="recipeingredients",
+            name="_ingredient",
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="recipe_ingredient",
+                to="recipes.ingredient",
+            ),
             preserve_default=False,
         ),
     ]

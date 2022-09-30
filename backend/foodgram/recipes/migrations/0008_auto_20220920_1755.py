@@ -4,8 +4,8 @@ from django.db import migrations
 
 
 def save_ingredients_fk(recipes, schema):
-    Ingredient = recipes.get_model('recipes', 'Ingredient')
-    RecipeIngredients = recipes.get_model('recipes', 'RecipeIngredients')
+    Ingredient = recipes.get_model("recipes", "Ingredient")
+    RecipeIngredients = recipes.get_model("recipes", "RecipeIngredients")
     for ri in RecipeIngredients.objects.all():
         ri._ingredients = ri.ingredients.all().first()  # Or whatever criterea you want
         ri._ingredients.save()
@@ -13,8 +13,8 @@ def save_ingredients_fk(recipes, schema):
 
 def save_ingredients_m2m(recipes, schema):
     # This should do the reverse
-    Ingredient = recipes.get_model('recipes', 'Ingredient')
-    RecipeIngredients = recipes.get_model('recipes', 'RecipeIngredients')
+    Ingredient = recipes.get_model("recipes", "Ingredient")
+    RecipeIngredients = recipes.get_model("recipes", "RecipeIngredients")
     for ri in RecipeIngredients.objects.all():
         if ri._ingredients:
             ri.ingredients.add(ri._ingredients)
@@ -23,8 +23,7 @@ def save_ingredients_m2m(recipes, schema):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('recipes', '0007_rename__ingredient_recipeingredients__ingredients'),
+        ("recipes", "0007_rename__ingredient_recipeingredients__ingredients"),
     ]
 
-    operations = [migrations.RunPython(save_ingredients_fk, save_ingredients_m2m)
-                  ]
+    operations = [migrations.RunPython(save_ingredients_fk, save_ingredients_m2m)]

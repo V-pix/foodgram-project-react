@@ -7,18 +7,30 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('recipes', '0010_rename__ingredients_recipeingredients_ingredients'),
+        ("recipes", "0010_rename__ingredients_recipeingredients_ingredients"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='recipeingredients',
-            name='ingredients',
-            field=models.ForeignKey(help_text='Выберете ингридиенты', on_delete=django.db.models.deletion.CASCADE, related_name='recipe_ingredients', to='recipes.ingredient', verbose_name='Ингредиенты блюда'),
+            model_name="recipeingredients",
+            name="ingredients",
+            field=models.ForeignKey(
+                help_text="Выберете ингридиенты",
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="recipe_ingredients",
+                to="recipes.ingredient",
+                verbose_name="Ингредиенты блюда",
+            ),
         ),
         migrations.AlterField(
-            model_name='recipeingredients',
-            name='recipe',
-            field=models.ForeignKey(help_text='Опишите рецепт', on_delete=django.db.models.deletion.CASCADE, related_name='recipe_ingredients', to='recipes.recipe', verbose_name='Рецепт блюда'),
+            model_name="recipeingredients",
+            name="recipe",
+            field=models.ForeignKey(
+                help_text="Опишите рецепт",
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="recipe_ingredients",
+                to="recipes.recipe",
+                verbose_name="Рецепт блюда",
+            ),
         ),
     ]

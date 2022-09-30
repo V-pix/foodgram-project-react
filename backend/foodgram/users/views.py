@@ -26,16 +26,10 @@ class UserRegistrationView(APIView):
         serializer = RegistrationSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            username = request.data.get('username')
+            username = request.data.get("username")
             # confirmation_generator(username)
-            return Response(
-                serializer.data,
-                status=status.HTTP_200_OK
-            )
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class AuthTokenView(APIView):
@@ -44,13 +38,15 @@ class AuthTokenView(APIView):
     def post(self, request):
         serializer = ObtainTokenSerializer(data=request.data)
         if serializer.is_valid():
-            username = serializer.data['username']
+            username = serializer.data["username"]
             # confirmation_code = serializer.data['confirmation_code']
             user = get_object_or_404(CustomUser, username=username)
             # if confirmation_code != user.confirmation_code:
             # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             token = RefreshToken.for_user(user)
-            return Response({'token': str(token.access_token)}, status=status.HTTP_200_OK)
+            return Response(
+                {"token": str(token.access_token)}, status=status.HTTP_200_OK
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -59,7 +55,7 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     serializer_class = CustomUserSerializer
     # permission_classes = (AdminPermission,)
     permission_classes = (AllowAny,)
-    lookup_field = 'username'
+    lookup_field = "username"
 
     # @action(
     # methods=['GET', 'PATCH'],
@@ -85,13 +81,12 @@ class SubscribtionViewSet(viewsets.ModelViewSet):
     serializer_class = SubscribtionSerializer
     # permission_classes = (AdminPermission,)
     filter_backends = (filters.SearchFilter,)
-    filterset_fields = ('user', 'author')
-    search_fields = ('author__username',)
+    filterset_fields = ("user", "author")
+    search_fields = ("author__username",)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
     def get_queryset(self):
-        user = get_object_or_404(
-            CustomUser, username=self.request.user.username)
+        user = get_object_or_404(CustomUser, username=self.request.user.username)
         return user.subscriber.all()

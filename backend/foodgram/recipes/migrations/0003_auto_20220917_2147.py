@@ -6,17 +6,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('recipes', '0002_initial'),
+        ("recipes", "0002_initial"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='recipe',
-            name='tags',
+            model_name="recipe",
+            name="tags",
         ),
         migrations.AddField(
-            model_name='recipe',
-            name='tags',
-            field=models.ManyToManyField(help_text='Выберите тэг', related_name='recipe', to='recipes.Tag'),
+            model_name="recipe",
+            name="tags",
+            field=models.ManyToManyField(
+                help_text="Выберите тэг", related_name="recipe", to="recipes.Tag"
+            ),
         ),
     ]

@@ -8,12 +8,10 @@ from users.models import CustomUser
 
 
 def confirmation_generator(username):
-    '''Generate confirmation codes'''
+    """Generate confirmation codes"""
 
     user = get_object_or_404(CustomUser, username=username)
-    confirmation_code = ''.join(
-        [random.choice(settings.CONF_GEN) for x in range(15)]
-    )
+    confirmation_code = "".join([random.choice(settings.CONF_GEN) for x in range(15)])
     user.confirmation_code = confirmation_code
     user.save()
 
@@ -22,5 +20,5 @@ def confirmation_generator(username):
         confirmation_code,
         settings.FROM_EMAIL,
         [user.email],
-        fail_silently=False
+        fail_silently=False,
     )

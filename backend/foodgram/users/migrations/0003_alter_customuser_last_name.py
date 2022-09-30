@@ -6,13 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0002_alter_customuser_email'),
+        ("users", "0002_alter_customuser_email"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='customuser',
-            name='last_name',
-            field=models.TextField(help_text='Укажите фамилию', max_length=150, verbose_name='Фамилия пользователя'),
+            model_name="customuser",
+            name="last_name",
+            field=models.TextField(
+                help_text="Укажите фамилию",
+                max_length=150,
+                verbose_name="Фамилия пользователя",
+            ),
         ),
     ]

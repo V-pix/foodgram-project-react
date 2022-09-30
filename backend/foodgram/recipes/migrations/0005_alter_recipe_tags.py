@@ -6,13 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('recipes', '0004_alter_recipe_image'),
+        ("recipes", "0004_alter_recipe_image"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='recipe',
-            name='tags',
-            field=models.ManyToManyField(help_text='Выберите тэг', related_name='recipe', to='recipes.Tag', verbose_name='Тэг блюда'),
+            model_name="recipe",
+            name="tags",
+            field=models.ManyToManyField(
+                help_text="Выберите тэг",
+                related_name="recipe",
+                to="recipes.Tag",
+                verbose_name="Тэг блюда",
+            ),
         ),
     ]
