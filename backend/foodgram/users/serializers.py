@@ -6,6 +6,8 @@ from users.models import CustomUser, Subscribtion
 
 
 class CustomUserSerializer(UserSerializer):
+    is_subscribed = serializers.SerializerMethodField()
+    
     def create(self, validated_data):
         user = CustomUser(
             email=validated_data["email"],
@@ -16,10 +18,17 @@ class CustomUserSerializer(UserSerializer):
         user.set_password(validated_data["password"])
         user.save()
         return user
+    
+    def get_is_subscribed(self, data):
+        request = self.context.get("request")
+        if request in None or request.user.is_anonymous:
+            return False
+        user = request.user
+        return Subscribtion.objects.filter(user=user, author=data).exists()
 
     class Meta:
         model = CustomUser
-        fields = ("email", "id", "username", "first_name", "last_name", "password")
+        fields = ("email", "id", "username", "first_name", "last_name", "password", "is_subscribed")
         extra_kwargs = {"password": {"write_only": True}}
 
     # def set_password(self, instance, validated_data):

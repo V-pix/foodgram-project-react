@@ -48,7 +48,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             recipe_in_favorite.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=["POST", "DELETE"], url_path="favorite")
+    @action(detail=True, methods=["POST", "DELETE"], url_path="shopping_cart")
     def shopping_cart(self, request, pk):
         current_user = self.request.user
         if current_user.is_anonymous:

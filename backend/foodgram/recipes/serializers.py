@@ -1,7 +1,5 @@
 import base64
 
-# from msilib.schema import Error
-
 
 from django.db import IntegrityError
 from django.core.files.base import ContentFile
@@ -141,9 +139,14 @@ class RecipeSerializer(serializers.ModelSerializer):
         user = request.user
         return Favorites.objects.filter(recipe=data.id, user=user).exists()
 
-    def get_is_in_shopping_cart(self, obj):
-        user = self.context.get("request").user.id
-        return ShoppingCart.objects.filter(user=user, recipe=obj.id).exists()
+    def get_is_in_shopping_cart(self, data):
+        # user = self.context.get("request").user.id
+        # return ShoppingCart.objects.filter(user=user, recipe=obj.id).exists()
+        request = self.context.get("request")
+        if request in None or request.user.is_anonymous:
+            return False
+        user = request.user
+        return ShoppingCart.objects.filter(recipe=data.id, user=user).exists()
 
     # def get_is_in_shopping_cart(self, data):
     # request = self.context.get('request')
@@ -204,9 +207,3 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShoppingCart
         fields = ("id", "cooking_time", "name", "image")
-
-
-# class TagSerializer(serializers.ModelSerializer):
-# class Meta:
-# model = Tag
-# fields = '__all__'
