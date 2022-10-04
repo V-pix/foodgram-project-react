@@ -22,10 +22,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
-    permission_classes = (AllowAny,)
+    # permission_classes = (AllowAny,)
 
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+    # def perform_create(self, serializer):
+        # serializer.save(author=self.request.user)
 
     @action(detail=True, methods=["POST", "DELETE"], url_path="favorite")
     def favorite(self, request, pk):

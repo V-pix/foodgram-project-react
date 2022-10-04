@@ -90,7 +90,7 @@ class RecipeIngredients(models.Model):
         verbose_name="Количество ингредиента",
         help_text="Укажите Количество ингредиента",
     )
-    ingredients = models.ForeignKey(
+    ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
         related_name="recipe_ingredients",
