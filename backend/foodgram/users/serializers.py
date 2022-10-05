@@ -81,17 +81,6 @@ class SubscribtionSerializer(serializers.ModelSerializer):
         ]
 
 
-# class SetPasswordSerializer(serializers.ModelSerializer):
-# class Meta:
-# model = CustomUser
-# fields = ('new_password', 'current_password')
-
-# def set_password(self, instance, validated_data):
-# instance.set_password(validated_data['new_password'])
-# instance.save()
-# return instance
-
-
 class ObtainTokenSerializer(serializers.ModelSerializer):
     username = serializers.CharField(max_length=50)
     # confirmation_code = serializers.CharField(max_length=15)

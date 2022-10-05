@@ -7,14 +7,22 @@ class Tag(models.Model):
     name = models.CharField(
         max_length=200,
         verbose_name="Название тега",
-        help_text="Проверьте название тега",
+        help_text="Укажите название тега",
         unique=True,
     )
     color = ColorField(
+        verbose_name="Цвет тега",
         default="#FF0000",
         unique=True,
     )
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(
+        verbose_name="Slug",
+        unique=True
+    )
+    
+    class Meta:
+        verbose_name = "Тег"
+        verbose_name_plural = "Теги"
 
     def __str__(self):
         return self.name
@@ -24,13 +32,20 @@ class Ingredient(models.Model):
     name = models.CharField(
         max_length=200,
         verbose_name="Название ингредиента",
-        help_text="Проверьте название ингредиента",
+        help_text="Укажите название ингредиента",
     )
-    measure_unit = models.CharField(
+    measurement_unit = models.CharField(
         max_length=200,
         verbose_name="Единицы измерения",
-        help_text="Проверьте единицы измерения",
+        help_text="Выберете единицы измерения",
     )
+    
+    class Meta:
+        verbose_name = "Ингредиент"
+        verbose_name_plural = "Ингредиенты"
+
+    def __str__(self):
+        return self.name
 
 
 class Recipe(models.Model):
@@ -43,7 +58,7 @@ class Recipe(models.Model):
     name = models.CharField(
         max_length=200,
         verbose_name="Название рецепта",
-        help_text="Проверьте название рецепта",
+        help_text="Укажите название рецепта",
     )
     image = models.ImageField(
         verbose_name="Картинка", upload_to="recipes/images/", blank=True
@@ -53,7 +68,7 @@ class Recipe(models.Model):
     )
     ingredients = models.ManyToManyField(
         Ingredient,
-        # through='RecipeIngredients',
+        through='RecipeIngredients',
         related_name="recipe",
         blank=True,
         verbose_name="Ингредиенты блюда",
@@ -61,7 +76,7 @@ class Recipe(models.Model):
     )
     tags = models.ManyToManyField(
         Tag,
-        # through='RecipeTags',
+        through='RecipeTags',
         related_name="recipe",
         verbose_name="Тэг блюда",
         help_text="Выберите тэг",
