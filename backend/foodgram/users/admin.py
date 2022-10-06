@@ -10,7 +10,6 @@ class UserAdmin(admin.ModelAdmin):
         "username",
         "email",
     )
-    # empty_value_display = '-пусто-'
 
 
 admin.site.register(CustomUser, UserAdmin)

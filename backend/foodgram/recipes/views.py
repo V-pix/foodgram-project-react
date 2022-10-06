@@ -38,7 +38,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
-    #   permission_classes = (AllowAny,)
 
     @action(
         detail=True,
@@ -53,7 +52,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, pk=pk)
         recipe_in_favorite = Favorites.objects.filter(user=current_user, recipe=recipe)
         if request.method == "POST":
-            # serializer = FavoritesSerializer(recipe)
             if recipe_in_favorite.exists():
                 data = {"errors": "Этот рецепт уже есть в избранном."}
                 return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
@@ -61,10 +59,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
             serializer = FavoritesSerializer(recipe, context={"request": request})
             return Response(
                 serializer.to_representation(instance=recipe),
-                # serializer.data,
                 status=status.HTTP_201_CREATED,
             )
-            # return Response(serializer.data, status=status.HTTP_201_CREATED)
         if request.method == "DELETE":
             if not recipe_in_favorite.exists():
                 data = {"errors": "Этого рецепта нет в избранном пользователя."}
@@ -87,7 +83,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
             user=current_user, recipe=recipe
         )
         if request.method == "POST":
-            # serializer = ShoppingCartSerializer(recipe)
             if recipe_in_shopping_cart.exists():
                 data = {"errors": "Рецепт уже есть в списке покупок."}
                 return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
@@ -95,7 +90,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
             serializer = ShoppingCartSerializer(recipe, context={"request": request})
             return Response(
                 serializer.to_representation(instance=recipe),
-                # serializer.data,
                 status=status.HTTP_201_CREATED,
             )
         if request.method == "DELETE":

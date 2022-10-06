@@ -1,4 +1,3 @@
-from multiprocessing import context
 from django.shortcuts import get_object_or_404, get_list_or_404
 from djoser.views import UserViewSet
 from rest_framework import filters, permissions, status, viewsets
@@ -11,7 +10,6 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.serializers import ListSerializer
 
 from users.models import CustomUser, Subscribtion
-from users.permissions import AdminPermission
 from recipes.serializers import (
     CustomUserSerializer,
     RegistrationSerializer,
@@ -31,7 +29,6 @@ class UserRegistrationView(APIView):
         if serializer.is_valid():
             serializer.save()
             username = request.data.get("username")
-            # confirmation_generator(username)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -39,10 +36,6 @@ class UserRegistrationView(APIView):
 class CustomUserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-    # permission_classes = (AdminPermission,)
-    # permission_classes = (AllowAny,)
-    # lookup_field = "username"
-    # pagination_class = None
     filter_backends = (filters.SearchFilter,)
     filterset_fields = ("user", "author")
     search_fields = ("author__username",)
@@ -77,27 +70,13 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     )
     def subscriptions(self, request):
         current_user = request.user
+        if current_user.is_anonymous:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         queryset = CustomUser.objects.filter(subscribing__user=current_user)
+        paginator = PageNumberPagination()
+        paginator.page_size_query_param = "limit"
         pages = self.paginate_queryset(queryset)
         serializer = SubscriptionsSerializer(
             pages, many=True, context={"request": request}
         )
         return self.get_paginated_response(serializer.data)
-
-    # @action(detail=True, methods=["GET"])
-    def subscriptions123(self, request, pk):
-        current_user = self.request.user
-        print(current_user)
-        if current_user.is_anonymous:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        author = get_object_or_404(CustomUser, pk=pk)
-        subscriptions_list = SubscribtionSerializer.objects.filter(
-            author__user=current_user
-        )
-        paginator = PageNumberPagination()
-        paginator.page_size_query_param = "limit"
-        authors = paginator.paginate_queryset(subscriptions_list, request=request)
-        serializer = ListSerializer(
-            child=SubscribtionSerializer(), context=self.get_serializer_context()
-        )
-        return paginator.get_paginated_response(serializer.to_representation(authors))

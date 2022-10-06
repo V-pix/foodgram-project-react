@@ -18,7 +18,6 @@ from recipes.models import (
     RecipeTags,
 )
 
-# from users.serializers import CustomUserSerializer
 from users.models import CustomUser, Subscribtion
 
 
@@ -56,11 +55,6 @@ class CustomUserSerializer(UserSerializer):
         )
         extra_kwargs = {"password": {"write_only": True}}
 
-    # def set_password(self, instance, validated_data):
-    # instance.set_password(validated_data['new_password'])
-    # instance.save()
-    # return instance
-
 
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
@@ -95,19 +89,10 @@ class RecipeIngredientsSerializer(serializers.ModelSerializer):
     )
     name = serializers.ReadOnlyField(source="ingredient.name")
     measurement_unit = serializers.ReadOnlyField(source="ingredient.measurement_unit")
-    # measurement_unit = serializers.CharField(
-    # read_only=True,
-    # source='ingredient.measurement_unit'
-    # )
-    # measurement_unit = serializers.SerializerMethodField()
 
     class Meta:
         model = RecipeIngredients
         fields = ("id", "name", "measurement_unit", "amount")
-
-    # def get_measurement_unit(self, obj):
-    # measurement_unit = Ingredient.objects.get(measurement_unit=obj)
-    # return measurement_unit
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -117,14 +102,12 @@ class RecipeSerializer(serializers.ModelSerializer):
     ingredients = RecipeIngredientsSerializer(
         many=True, read_only=True, source="recipe_ingredients"
     )
-    # ingredients = RecipeIngredientsSerializer(many=True, read_only=True)
     tags = TagSerializer(read_only=True, many=True)
     author = CustomUserSerializer(
         read_only=True, default=serializers.CurrentUserDefault()
     )
     image = Base64ImageField(required=False, allow_null=True)
     is_favorited = serializers.SerializerMethodField()
-    # is_in_shopping_cart = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField(
         source="get_is_in_shopping_cart"
     )
@@ -148,8 +131,6 @@ class RecipeSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         context = self.context["request"]
         author = self.context["request"].user
-        # ingredients = validated_data.pop("recipe_ingredients")
-        # ingredients = validated_data.pop("ingredients")
         try:
             recipe = Recipe.objects.create(**validated_data, author=author)
         except IntegrityError as err:
@@ -164,15 +145,12 @@ class RecipeSerializer(serializers.ModelSerializer):
                 recipe=recipe,
                 ingredient=ingredient_model,
                 amount=ingredient["amount"],
-                # measurement_unit=Ingredient.objects.get(ingredient["measurement_unit"]),
             )
         return recipe
 
     def update(self, instance, validated_data):
         context = self.context["request"]
-        # ingredients = validated_data.pop("recipe_ingredients")
         tags_set = context.data["tags"]
-        # recipe = instance
         instance.name = validated_data.get("name", instance.name)
         instance.text = validated_data.get("text", instance.text)
         instance.cooking_time = validated_data.get(
@@ -200,22 +178,11 @@ class RecipeSerializer(serializers.ModelSerializer):
         return Favorites.objects.filter(recipe=data.id, user=user).exists()
 
     def get_is_in_shopping_cart(self, data):
-        # user = self.context.get("request").user.id
-        # return ShoppingCart.objects.filter(user=user, recipe=obj.id).exists()
         request = self.context.get("request")
         if not request or request.user.is_anonymous:
             return False
         user = request.user
         return ShoppingCart.objects.filter(recipe=data, user=user).exists()
-
-    # def get_is_in_shopping_cart(self, data):
-    # request = self.context.get('request')
-    # try:
-    # user = self.context.get('request').user
-    # except:
-    # user = self.context.get('user')
-    # queryset_shop = ShoppingCart.objects.filter(recipe=data, user=user)
-    # return True
 
 
 class FavoritesSerializer(serializers.ModelSerializer):
@@ -236,14 +203,14 @@ class FavoritesSerializer(serializers.ModelSerializer):
         source="recipe.name",
     )
 
+    class Meta:
+        model = Favorites
+        fields = ("id", "cooking_time", "name", "image")
+
     def create(self, validated_data):
         favorite = Favorites.objects.create(**validated_data)
         favorite.save()
         return favorite
-
-    class Meta:
-        model = Favorites
-        fields = ("id", "cooking_time", "name", "image")
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
@@ -267,12 +234,6 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShoppingCart
         fields = ("id", "cooking_time", "name", "image")
-
-    # def to_representation(self, instance):
-    # request = self.context.get('request')
-    # context = {'request': request}
-    # return ShoppingCartSerializer(
-    # instance.recipe, context=context).data
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -323,7 +284,6 @@ class SubscriptionsSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField(read_only=True)
     recipes = serializers.SerializerMethodField(read_only=True)
     recipes_count = serializers.SerializerMethodField(read_only=True)
-    # recipes_count = serializers.IntegerField(source='recipes.count', read_only=True)
 
     class Meta:
         model = CustomUser
