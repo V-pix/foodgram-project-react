@@ -52,10 +52,14 @@ class CustomUser(AbstractUser):
         "last_name",
     ]
 
-    # class Meta:
-        # constraints = [
-            # models.UniqueConstraint(fields=["username", "email"], name="unique_user")
-        # ]
+    class Meta:
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
+        ordering = ["username"]
+
+        constraints = [
+            models.UniqueConstraint(fields=["username", "email"], name="unique_user")
+        ]
 
     def __str__(self):
         return self.username
@@ -78,7 +82,8 @@ class Subscribtion(models.Model):
         related_name="subscribing",
         verbose_name="Автор",
     )
-    
+
     class Meta:
-        ordering = ['-id']
-        verbose_name = 'Подписка'
+        ordering = ["-id"]
+        verbose_name = "Подписка"
+        verbose_name_plural = "Подписки"

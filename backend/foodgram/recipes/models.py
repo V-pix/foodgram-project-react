@@ -15,11 +15,8 @@ class Tag(models.Model):
         default="#FF0000",
         unique=True,
     )
-    slug = models.SlugField(
-        verbose_name="Slug",
-        unique=True
-    )
-    
+    slug = models.SlugField(verbose_name="Slug", unique=True)
+
     class Meta:
         verbose_name = "Тег"
         verbose_name_plural = "Теги"
@@ -39,7 +36,7 @@ class Ingredient(models.Model):
         verbose_name="Единицы измерения",
         help_text="Выберете единицы измерения",
     )
-    
+
     class Meta:
         verbose_name = "Ингредиент"
         verbose_name_plural = "Ингредиенты"
@@ -68,7 +65,7 @@ class Recipe(models.Model):
     )
     ingredients = models.ManyToManyField(
         Ingredient,
-        through='RecipeIngredients',
+        through="RecipeIngredients",
         related_name="recipe",
         blank=True,
         verbose_name="Ингредиенты блюда",
@@ -76,7 +73,7 @@ class Recipe(models.Model):
     )
     tags = models.ManyToManyField(
         Tag,
-        through='RecipeTags',
+        through="RecipeTags",
         related_name="recipe",
         verbose_name="Тэг блюда",
         help_text="Выберите тэг",

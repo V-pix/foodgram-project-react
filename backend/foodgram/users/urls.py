@@ -11,7 +11,7 @@ app_name = "users"
 router = DefaultRouter()
 router.register(r"users", CustomUserViewSet, basename="users")
 # router.register(
-    # r"users/(?P<author_id>\d+)/subscribe", SubscribtionViewSet, basename="subscribe"
+# r"users/(?P<author_id>\d+)/subscribe", SubscribtionViewSet, basename="subscribe"
 # )
 
 urlpatterns = [

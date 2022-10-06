@@ -12,13 +12,12 @@ from rest_framework.serializers import ListSerializer
 
 from users.models import CustomUser, Subscribtion
 from users.permissions import AdminPermission
-from users.serializers import (
+from recipes.serializers import (
     CustomUserSerializer,
     RegistrationSerializer,
     SubscribtionSerializer,
-    SubscriptionsSerializer
+    SubscriptionsSerializer,
 )
-# from recipes.serializers import SubscriptionsSerializer
 
 
 class UserRegistrationView(APIView):
@@ -49,18 +48,16 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     search_fields = ("author__username",)
 
     @action(
-        detail=True,
-        methods=['POST', 'DELETE'],
-        permission_classes=[IsAuthenticated]
+        detail=True, methods=["POST", "DELETE"], permission_classes=[IsAuthenticated]
     )
     def subscribe(self, request, pk):
         user = request.user
         author = get_object_or_404(CustomUser, id=pk)
-        if request.method == 'POST':
-            data = {'user': user.id, 'author': pk}
+        if request.method == "POST":
+            data = {"user": user.id, "author": pk}
             serializer = SubscribtionSerializer(
                 data=data,
-                context={'request': request},
+                context={"request": request},
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -70,10 +67,10 @@ class CustomUserViewSet(viewsets.ModelViewSet):
             follow.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(
-            {'error': 'Вы не подписаны на этого автора'},
-            status=status.HTTP_400_BAD_REQUEST
+            {"error": "Вы не подписаны на этого автора"},
+            status=status.HTTP_400_BAD_REQUEST,
         )
-        
+
     @action(
         detail=False,
         permission_classes=(IsAuthenticated,),
@@ -83,13 +80,10 @@ class CustomUserViewSet(viewsets.ModelViewSet):
         queryset = CustomUser.objects.filter(subscribing__user=current_user)
         pages = self.paginate_queryset(queryset)
         serializer = SubscriptionsSerializer(
-            pages,
-            many=True,
-            context={'request':request}
+            pages, many=True, context={"request": request}
         )
         return self.get_paginated_response(serializer.data)
-    
-    
+
     # @action(detail=True, methods=["GET"])
     def subscriptions123(self, request, pk):
         current_user = self.request.user
@@ -97,11 +91,13 @@ class CustomUserViewSet(viewsets.ModelViewSet):
         if current_user.is_anonymous:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         author = get_object_or_404(CustomUser, pk=pk)
-        subscriptions_list = SubscribtionSerializer.objects.filter(author__user=current_user)
+        subscriptions_list = SubscribtionSerializer.objects.filter(
+            author__user=current_user
+        )
         paginator = PageNumberPagination()
-        paginator.page_size_query_param = 'limit'
+        paginator.page_size_query_param = "limit"
         authors = paginator.paginate_queryset(subscriptions_list, request=request)
         serializer = ListSerializer(
-            child=SubscribtionSerializer(),
-            context=self.get_serializer_context())
+            child=SubscribtionSerializer(), context=self.get_serializer_context()
+        )
         return paginator.get_paginated_response(serializer.to_representation(authors))
