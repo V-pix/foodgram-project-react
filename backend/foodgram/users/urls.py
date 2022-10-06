@@ -17,9 +17,11 @@ router.register(r"users", CustomUserViewSet, basename="users")
 urlpatterns = [
     # path('auth/signup/', UserRegistrationView.as_view(), name='signup'),
     # path('auth/token/login/', AuthTokenView.as_view(), name='auth'),
-    path("", include("djoser.urls")),
-    path("auth/", include("djoser.urls.authtoken")),
     path("", include(router.urls)),
+    # path("", include("djoser.urls")),
+    path("auth/", include("djoser.urls.authtoken")),
+    path("", include("djoser.urls")),
+    # path("", include(router.urls)),
     # path('users/subscriptions/'),
     # path('users/<int:post_id>/subscribe/'),
 ]

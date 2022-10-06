@@ -16,6 +16,7 @@ from recipes.models import (
     RecipeTags,
 )
 from users.serializers import CustomUserSerializer
+from users.models import CustomUser, Subscribtion
 
 
 class TagSerializer(serializers.ModelSerializer):

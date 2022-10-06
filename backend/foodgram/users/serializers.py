@@ -81,15 +81,8 @@ class SubscribtionSerializer(serializers.ModelSerializer):
         if user == author:
             raise serializers.ValidationError("Нельзя подписываться на самого себя")
         return data
-    
-    def to_representation(self, instance):
-        return SubscriptionsSerializer(
-            instance.author,
-            context={'request': self.context.get('request')}
-        ).data
 
 class SubscriptionsSerializer(serializers.ModelSerializer):
-    """Сериализатор для отображения подписок."""
 
     is_subscribed = serializers.SerializerMethodField(read_only=True)
     # recipes = serializers.SerializerMethodField(read_only=True)
@@ -119,8 +112,6 @@ class SubscriptionsSerializer(serializers.ModelSerializer):
         return Subscribtion.objects.filter(
             author=data, user=self.context.get('request').user
         ).exists()
-        
-    
     
 class SubscribtionSerializer123(serializers.ModelSerializer):
     # username = serializers.SlugRelatedField(
