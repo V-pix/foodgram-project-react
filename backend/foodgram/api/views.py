@@ -29,15 +29,16 @@ from recipes.models import (
 from api.serializers import (
     CustomUserSerializer,
     RegistrationSerializer,
-    SubscribtionSerializer,
-    SubscriptionsSerializer,
+    SubscribtionValidSerializer,
+    SubscribtionsSerializer,
     FavoritesSerializer,
     IngredientSerializer,
     RecipeSerializer,
     RecipeGetSerializer,
     ShoppingCartSerializer,
     TagSerializer,
-    FavoritesValidSerializer
+    FavoritesValidSerializer,
+    ShoppingCartValidSerializer
 )
 from api.filters import RecipeFilter
 
@@ -95,28 +96,28 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=(IsAuthenticated,),
     )
     def shopping_cart(self, request, pk):
-        current_user = request.user
-        if current_user.is_anonymous:
+        user = request.user
+        if user.is_anonymous:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         recipe = get_object_or_404(Recipe, pk=pk)
-        recipe_in_shopping_cart = ShoppingCart.objects.filter(
-            user=current_user, recipe=recipe
-        )
+        data = {
+            'user': request.user.id,
+            'recipe': pk
+            }
+        serializer = ShoppingCartValidSerializer(data=data, context={
+                'request': request,
+                'recipe': recipe
+            },)
+        serializer.is_valid(raise_exception=True)
         if request.method == "POST":
-            if recipe_in_shopping_cart.exists():
-                data = {"errors": "Рецепт уже есть в списке покупок."}
-                return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-            recipe = ShoppingCart.objects.create(user=current_user, recipe=recipe)
+            recipe = ShoppingCart.objects.create(user=user, recipe=recipe)
             serializer = ShoppingCartSerializer(recipe, context={"request": request})
             return Response(
                 serializer.to_representation(instance=recipe),
                 status=status.HTTP_201_CREATED,
             )
         if request.method == "DELETE":
-            if not recipe_in_shopping_cart.exists():
-                data = {"errors": "Этого рецепта нет в списке покупок."}
-                return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-            recipe_in_shopping_cart.delete()
+            ShoppingCart.objects.filter(user=user, recipe=recipe).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
@@ -205,24 +206,45 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     )
     def subscribe(self, request, pk):
         user = request.user
+        if user.is_anonymous:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         author = get_object_or_404(CustomUser, id=pk)
+        data = {"user": user.id, "author": pk}
+        serializer = SubscribtionValidSerializer(
+            data=data,
+            context={"request": request, 'author': author},
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         if request.method == "POST":
-            data = {"user": user.id, "author": pk}
-            serializer = SubscribtionSerializer(
-                data=data,
-                context={"request": request},
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
+            author= Subscribtion.objects.create(user=user, author=author)
+            # serializer = SubscribtionsSerializer(author, context={"request": request})
+            return Response(serializer.to_representation(instance=author), status=status.HTTP_201_CREATED)
+        if request.method == "DELETE":
+            Subscribtion.objects.filter(user=user, author=author).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        
+        
+    def subscribe13(self, request, pk):
+        user = request.user
+        if user.is_anonymous:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        author = get_object_or_404(CustomUser, id=pk)
+        data = {"user": user.id, "author": pk}
+        serializer = SubscribtionValidSerializer(
+            data=data,
+            context={"request": request, 'author': author},
+        )
+        serializer.is_valid(raise_exception=True)
+        # serializer.save()
+        if request.method == "POST":
+            follow = Subscribtion.objects.create(user=user, author=author)
+            serializer = SubscribtionsSerializer(follow, context={"request": request})
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         follow = Subscribtion.objects.filter(user=user, author=author)
-        if follow.exists():
+        if request.method == "DELETE":
             follow.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(
-            {"error": "Вы не подписаны на этого автора"},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
 
     @action(
         detail=False,
@@ -236,7 +258,7 @@ class CustomUserViewSet(viewsets.ModelViewSet):
         paginator = PageNumberPagination()
         paginator.page_size_query_param = "limit"
         pages = self.paginate_queryset(queryset)
-        serializer = SubscriptionsSerializer(
+        serializer = SubscribtionsSerializer(
             pages, many=True, context={"request": request}
         )
         return self.get_paginated_response(serializer.data)
