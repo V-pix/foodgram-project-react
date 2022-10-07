@@ -1,9 +1,11 @@
 from cgitb import text
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, status
+from rest_framework import filters, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.pagination import PageNumberPagination
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
 from django.http import FileResponse, HttpResponse
@@ -15,6 +17,7 @@ from reportlab.lib.units import inch
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
+from users.models import CustomUser, Subscribtion
 from recipes.models import (
     Recipe,
     ShoppingCart,
@@ -23,21 +26,33 @@ from recipes.models import (
     Favorites,
     RecipeIngredients,
 )
-from recipes.serializers import (
+from api.serializers import (
+    CustomUserSerializer,
+    RegistrationSerializer,
+    SubscribtionSerializer,
+    SubscriptionsSerializer,
     FavoritesSerializer,
     IngredientSerializer,
     RecipeSerializer,
+    RecipeGetSerializer,
     ShoppingCartSerializer,
     TagSerializer,
+    FavoritesValidSerializer
 )
-from recipes.filters import RecipeFilter
+from api.filters import RecipeFilter
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
+    # permission_classes = (OwnerOrAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
+    
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return RecipeGetSerializer
+        return RecipeSerializer
 
     @action(
         detail=True,
@@ -46,26 +61,31 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=(IsAuthenticated,),
     )
     def favorite(self, request, pk):
-        current_user = self.request.user
-        if current_user.is_anonymous:
+        user = request.user
+        if user.is_anonymous:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         recipe = get_object_or_404(Recipe, pk=pk)
-        recipe_in_favorite = Favorites.objects.filter(user=current_user, recipe=recipe)
-        if request.method == "POST":
-            if recipe_in_favorite.exists():
-                data = {"errors": "Этот рецепт уже есть в избранном."}
-                return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-            recipe = Favorites.objects.create(user=current_user, recipe=recipe)
+        data = {
+            'user': request.user.id,
+            'recipe': pk
+            }
+        serializer = FavoritesValidSerializer(data=data, context={
+                'request': request,
+                'recipe': recipe
+            },)
+        serializer.is_valid(raise_exception=True)
+        if request.method == 'POST':
+            recipe = Favorites.objects.create(user=user, recipe=recipe)
             serializer = FavoritesSerializer(recipe, context={"request": request})
             return Response(
                 serializer.to_representation(instance=recipe),
-                status=status.HTTP_201_CREATED,
-            )
-        if request.method == "DELETE":
-            if not recipe_in_favorite.exists():
-                data = {"errors": "Этого рецепта нет в избранном пользователя."}
-                return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-            recipe_in_favorite.delete()
+                status=status.HTTP_201_CREATED
+                )
+        if request.method == 'DELETE':
+            Favorites.objects.filter(
+                user=user,
+                recipe=recipe
+            ).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
@@ -156,3 +176,67 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = [DjangoFilterBackend]
     search_fields = ("^name",)
     pagination_class = None
+
+
+class UserRegistrationView(APIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = RegistrationSerializer
+    permission_classes = (AllowAny,)
+    pagination_class = None
+
+    def post(self, request):
+        serializer = RegistrationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            username = request.data.get("username")
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CustomUserViewSet(viewsets.ModelViewSet):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserSerializer
+    filter_backends = (filters.SearchFilter,)
+    filterset_fields = ("user", "author")
+    search_fields = ("author__username",)
+
+    @action(
+        detail=True, methods=["POST", "DELETE"], permission_classes=[IsAuthenticated]
+    )
+    def subscribe(self, request, pk):
+        user = request.user
+        author = get_object_or_404(CustomUser, id=pk)
+        if request.method == "POST":
+            data = {"user": user.id, "author": pk}
+            serializer = SubscribtionSerializer(
+                data=data,
+                context={"request": request},
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        follow = Subscribtion.objects.filter(user=user, author=author)
+        if follow.exists():
+            follow.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {"error": "Вы не подписаны на этого автора"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    @action(
+        detail=False,
+        permission_classes=(IsAuthenticated,),
+    )
+    def subscriptions(self, request):
+        current_user = request.user
+        if current_user.is_anonymous:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        queryset = CustomUser.objects.filter(subscribing__user=current_user)
+        paginator = PageNumberPagination()
+        paginator.page_size_query_param = "limit"
+        pages = self.paginate_queryset(queryset)
+        serializer = SubscriptionsSerializer(
+            pages, many=True, context={"request": request}
+        )
+        return self.get_paginated_response(serializer.data)
