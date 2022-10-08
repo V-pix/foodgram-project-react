@@ -15,7 +15,6 @@ router.register("ingredients", IngredientViewSet, basename="ingredients")
 
 urlpatterns = [
     path(
-        
         "users/subscriptions/",
         CustomUserViewSet.as_view(
             {

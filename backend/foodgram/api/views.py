@@ -38,7 +38,7 @@ from api.serializers import (
     ShoppingCartSerializer,
     TagSerializer,
     FavoritesValidSerializer,
-    ShoppingCartValidSerializer
+    ShoppingCartValidSerializer,
 )
 from api.filters import RecipeFilter
 
@@ -49,9 +49,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     # permission_classes = (OwnerOrAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
-    
+
     def get_serializer_class(self):
-        if self.request.method == 'GET':
+        if self.request.method == "GET":
             return RecipeGetSerializer
         return RecipeSerializer
 
@@ -66,27 +66,21 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if user.is_anonymous:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         recipe = get_object_or_404(Recipe, pk=pk)
-        data = {
-            'user': request.user.id,
-            'recipe': pk
-            }
-        serializer = FavoritesValidSerializer(data=data, context={
-                'request': request,
-                'recipe': recipe
-            },)
+        data = {"user": request.user.id, "recipe": pk}
+        serializer = FavoritesValidSerializer(
+            data=data,
+            context={"request": request, "recipe": recipe},
+        )
         serializer.is_valid(raise_exception=True)
-        if request.method == 'POST':
+        if request.method == "POST":
             recipe = Favorites.objects.create(user=user, recipe=recipe)
             serializer = FavoritesSerializer(recipe, context={"request": request})
             return Response(
                 serializer.to_representation(instance=recipe),
-                status=status.HTTP_201_CREATED
-                )
-        if request.method == 'DELETE':
-            Favorites.objects.filter(
-                user=user,
-                recipe=recipe
-            ).delete()
+                status=status.HTTP_201_CREATED,
+            )
+        if request.method == "DELETE":
+            Favorites.objects.filter(user=user, recipe=recipe).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
@@ -100,14 +94,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if user.is_anonymous:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         recipe = get_object_or_404(Recipe, pk=pk)
-        data = {
-            'user': request.user.id,
-            'recipe': pk
-            }
-        serializer = ShoppingCartValidSerializer(data=data, context={
-                'request': request,
-                'recipe': recipe
-            },)
+        data = {"user": request.user.id, "recipe": pk}
+        serializer = ShoppingCartValidSerializer(
+            data=data,
+            context={"request": request, "recipe": recipe},
+        )
         serializer.is_valid(raise_exception=True)
         if request.method == "POST":
             recipe = ShoppingCart.objects.create(user=user, recipe=recipe)
@@ -212,19 +203,21 @@ class CustomUserViewSet(viewsets.ModelViewSet):
         data = {"user": user.id, "author": pk}
         serializer = SubscribtionValidSerializer(
             data=data,
-            context={"request": request, 'author': author},
+            context={"request": request, "author": author},
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
         if request.method == "POST":
-            author= Subscribtion.objects.create(user=user, author=author)
+            author = Subscribtion.objects.create(user=user, author=author)
             # serializer = SubscribtionsSerializer(author, context={"request": request})
-            return Response(serializer.to_representation(instance=author), status=status.HTTP_201_CREATED)
+            return Response(
+                serializer.to_representation(instance=author),
+                status=status.HTTP_201_CREATED,
+            )
         if request.method == "DELETE":
             Subscribtion.objects.filter(user=user, author=author).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        
-        
+
     def subscribe13(self, request, pk):
         user = request.user
         if user.is_anonymous:
@@ -233,7 +226,7 @@ class CustomUserViewSet(viewsets.ModelViewSet):
         data = {"user": user.id, "author": pk}
         serializer = SubscribtionValidSerializer(
             data=data,
-            context={"request": request, 'author': author},
+            context={"request": request, "author": author},
         )
         serializer.is_valid(raise_exception=True)
         # serializer.save()
