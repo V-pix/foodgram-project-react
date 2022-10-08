@@ -186,14 +186,11 @@ class RecipeSerializer(serializers.ModelSerializer):
         if not cooking_time:
             raise serializers.ValidationError("Укажите время приготовления")
         return cooking_time
-    
+
     def validate_ingredients(self, ingredients):
-        # print(ingredients)
         if not ingredients:
             raise serializers.ValidationError("Выберите ингридиенты")
         ingredients_recipe = self.initial_data.get("ingredients")
-        print(ingredients_recipe)
-        # [{'id': 1123, 'amount': 10}, {'id': 1124, 'amount': 10}]
         ingredients_list = []
         for ingredient in ingredients_recipe:
             if ingredient["id"] in ingredients_list:
@@ -202,9 +199,6 @@ class RecipeSerializer(serializers.ModelSerializer):
                 )
             ingredients_list.append(ingredient["id"])
         return ingredients_recipe
-        # reprint(ingredients)
-        # [OrderedDict([('ingredient', {'id': <Ingredient: овощная смесь>}), ('amount', 10)]), OrderedDict([('ingredient', {'id': <Ingredient: овощная смесь замороженная>}), ('amount', 10)])]
-        r# eturn ingredients
 
     def ingredient_create(self, recipe, ingredients):
         RecipeIngredients.objects.bulk_create(
