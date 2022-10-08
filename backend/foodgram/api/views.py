@@ -46,7 +46,6 @@ from api.filters import RecipeFilter
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
-    # permission_classes = (OwnerOrAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
 
@@ -209,34 +208,12 @@ class CustomUserViewSet(viewsets.ModelViewSet):
         serializer.save()
         if request.method == "POST":
             author = Subscribtion.objects.create(user=user, author=author)
-            # serializer = SubscribtionsSerializer(author, context={"request": request})
             return Response(
                 serializer.to_representation(instance=author),
                 status=status.HTTP_201_CREATED,
             )
         if request.method == "DELETE":
             Subscribtion.objects.filter(user=user, author=author).delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def subscribe13(self, request, pk):
-        user = request.user
-        if user.is_anonymous:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        author = get_object_or_404(CustomUser, id=pk)
-        data = {"user": user.id, "author": pk}
-        serializer = SubscribtionValidSerializer(
-            data=data,
-            context={"request": request, "author": author},
-        )
-        serializer.is_valid(raise_exception=True)
-        # serializer.save()
-        if request.method == "POST":
-            follow = Subscribtion.objects.create(user=user, author=author)
-            serializer = SubscribtionsSerializer(follow, context={"request": request})
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        follow = Subscribtion.objects.filter(user=user, author=author)
-        if request.method == "DELETE":
-            follow.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(

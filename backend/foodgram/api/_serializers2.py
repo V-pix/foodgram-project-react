@@ -162,6 +162,10 @@ class RecipeSerializer(serializers.ModelSerializer):
     ingredients = RecipeIngredientsSerializer(many=True)
     tags = serializers.PrimaryKeyRelatedField(queryset=Tag.objects.all(), many=True)
     image = Base64ImageField(required=False, allow_null=True)
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField(
+        source="get_is_in_shopping_cart"
+    )
 
     class Meta:
         model = Recipe
@@ -170,12 +174,19 @@ class RecipeSerializer(serializers.ModelSerializer):
             "tags",
             "author",
             "ingredients",
+            "is_favorited",
+            "is_in_shopping_cart",
             "name",
             "image",
             "text",
             "cooking_time",
         )
         read_only_fields = ("author",)
+
+    def validate_ingredients(self, ingredients):
+        if not ingredients:
+            raise serializers.ValidationError("Выберите ингридиенты")
+        return ingredients
 
     def validate_tags(self, tags):
         if not tags:
@@ -187,24 +198,66 @@ class RecipeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Укажите время приготовления")
         return cooking_time
     
-    def validate_ingredients(self, ingredients):
-        # print(ingredients)
-        if not ingredients:
-            raise serializers.ValidationError("Выберите ингридиенты")
-        ingredients_recipe = self.initial_data.get("ingredients")
-        print(ingredients_recipe)
-        # [{'id': 1123, 'amount': 10}, {'id': 1124, 'amount': 10}]
+    def _validate(self, data):
+        # print(data)
+        ingredients = self.initial_data.get("ingredients")
+        print(ingredients)
+        [{'id': 1123, 'amount': 10}, {'id': 1124, 'amount': 10}]
         ingredients_list = []
-        for ingredient in ingredients_recipe:
+        for ingredient in ingredients:
             if ingredient["id"] in ingredients_list:
                 raise serializers.ValidationError(
                     {"ingredients": "Ингредиенты не должны повторяться"}
                 )
             ingredients_list.append(ingredient["id"])
-        return ingredients_recipe
-        # reprint(ingredients)
-        # [OrderedDict([('ingredient', {'id': <Ingredient: овощная смесь>}), ('amount', 10)]), OrderedDict([('ingredient', {'id': <Ingredient: овощная смесь замороженная>}), ('amount', 10)])]
-        r# eturn ingredients
+        print(data)
+        # OrderedDict([('tags', [<Tag: Завтрак>]), ('ingredients', [OrderedDict([('ingredient', {'id': <Ingredient: овощная смесь>}), ('amount', 10)]), OrderedDict([('ingredient', {'id': <Ingredient: овощная смесь замороженная>}), ('amount', 10)])]), ('name', 'tempor cillum occaecat deserunt'), ('image', <ContentFile: Raw content>), ('text', 'nisi dolor occaecat'), ('cooking_time', 17116680)])
+        data["ingredients"] = ingredients
+        [{'id': 1123, 'amount': 10}, {'id': 1124, 'amount': 10}]
+        print(data["ingredients"])
+        return data
+
+
+    def _validate_ingredients(self, ingredients):
+        print(ingredients)
+        if not ingredients:
+            raise serializers.ValidationError("Выберите ингридиенты")
+        # ingredients = self.initial_data.get("ingredients")
+        ingredients_list = []
+        for ingredient in ingredients:
+            if ingredient["id"] in ingredients_list:
+                raise serializers.ValidationError(
+                    {"ingredients": "Ингредиенты не должны повторяться"}
+                )
+            ingredients_list.append(ingredient["id"])
+        # ingredients123["ingredients"] = ingredients
+        return ingredients
+
+    def validate(self, data):
+        ingredients = self.initial_data.get("ingredients")
+        ingredients_list = []
+        for ingredient in ingredients:
+            if ingredient["id"] in ingredients_list:
+                raise serializers.ValidationError(
+                    {"ingredients": "Ингредиенты не должны повторяться"}
+                )
+            ingredients_list.append(ingredient["id"])
+        data["ingredients"] = ingredients
+        return data
+    
+    def validate(self, data):
+        if not data:
+            raise serializers.ValidationError("Выберите ингридиенты")
+        ingredients = self.initial_data.get("ingredients")
+        ingredients_list = []
+        for ingredient in ingredients:
+            if ingredient["id"] in ingredients_list:
+                raise serializers.ValidationError(
+                    {"ingredients": "Ингредиенты не должны повторяться"}
+                )
+            ingredients_list.append(ingredient["id"])
+        data["ingredients"] = ingredients
+        return data
 
     def ingredient_create(self, recipe, ingredients):
         RecipeIngredients.objects.bulk_create(
@@ -243,6 +296,20 @@ class RecipeSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         context = {"request": request}
         return RecipeGetSerializer(instance, context=context).data
+
+    def get_is_favorited(self, data):
+        request = self.context.get("request")
+        if not request or request.user.is_anonymous:
+            return False
+        user = request.user
+        return Favorites.objects.filter(recipe=data.id, user=user).exists()
+
+    def get_is_in_shopping_cart(self, data):
+        request = self.context.get("request")
+        if not request or request.user.is_anonymous:
+            return False
+        user = request.user
+        return ShoppingCart.objects.filter(recipe=data, user=user).exists()
 
 
 class FavoritesSerializer(serializers.ModelSerializer):
