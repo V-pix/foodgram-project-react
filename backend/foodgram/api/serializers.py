@@ -332,7 +332,11 @@ class ShoppingCartValidSerializer(serializers.ModelSerializer):
 
 
 class SubscribtionsSerializer(serializers.ModelSerializer):
-
+    id = serializers.ReadOnlyField(source='author.id')
+    email = serializers.ReadOnlyField(source='author.email')
+    username = serializers.ReadOnlyField(source='author.username')
+    first_name = serializers.ReadOnlyField(source='author.first_name')
+    last_name = serializers.ReadOnlyField(source='author.last_name')
     is_subscribed = serializers.SerializerMethodField(read_only=True)
     recipes = serializers.SerializerMethodField(read_only=True)
     recipes_count = serializers.SerializerMethodField(read_only=True)
@@ -349,7 +353,7 @@ class SubscribtionsSerializer(serializers.ModelSerializer):
             "recipes",
             "recipes_count",
         )
-
+        
     def get_recipes(self, obj):
         request = self.context.get("request")
         if request is None or request.user.is_anonymous:
@@ -358,7 +362,9 @@ class SubscribtionsSerializer(serializers.ModelSerializer):
         queryset = Recipe.objects.filter(author=obj)
         if recipes_limit:
             queryset = queryset[: int(recipes_limit)]
-        return RecipeSerializer(queryset, many=True).data
+        # return RecipeSerializer(queryset, many=True).data
+        return SubscribtionRecipeSerializer(queryset, many=True).data
+    
 
     def get_recipes_count(self, obj):
         return Recipe.objects.filter(author=obj).count()
@@ -372,6 +378,12 @@ class SubscribtionsSerializer(serializers.ModelSerializer):
         ).exists()
 
 
+class SubscribtionRecipeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
+        
+        
 class SubscribtionValidSerializer(serializers.ModelSerializer):
     queryset = CustomUser.objects.all()
     user = serializers.PrimaryKeyRelatedField(queryset=queryset)

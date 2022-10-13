@@ -6,7 +6,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, get_list_or_404
 from django.core.exceptions import ValidationError
 from django.http import FileResponse, HttpResponse
 import io
@@ -31,6 +31,7 @@ from api.serializers import (
     RegistrationSerializer,
     SubscribtionValidSerializer,
     SubscribtionsSerializer,
+    SubscribtionRecipeSerializer,
     FavoritesSerializer,
     IngredientSerializer,
     RecipeSerializer,
@@ -40,12 +41,14 @@ from api.serializers import (
     FavoritesValidSerializer,
     ShoppingCartValidSerializer,
 )
-from api.filters import RecipeFilter
+from api.filters import RecipeFilter, IngredientSearchFilter
+from api.pagination import LimitPageNumberPagination
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
+    pagination_class = LimitPageNumberPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
 
@@ -53,7 +56,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if self.request.method == "GET":
             return RecipeGetSerializer
         return RecipeSerializer
-
+    
     @action(
         detail=True,
         methods=["POST", "DELETE"],
@@ -91,6 +94,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def shopping_cart(self, request, pk):
         user = request.user
         if user.is_anonymous:
+        # if self.request.user.is_anonimous:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         recipe = get_object_or_404(Recipe, pk=pk)
         data = {"user": request.user.id, "recipe": pk}
@@ -164,7 +168,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = (IngredientSearchFilter,)
     search_fields = ("^name",)
     pagination_class = None
 
@@ -219,14 +223,17 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     @action(
         detail=False,
         permission_classes=(IsAuthenticated,),
+        # pagination_class = LimitPageNumberPagination
     )
     def subscriptions(self, request):
-        current_user = request.user
-        if current_user.is_anonymous:
+        user = request.user
+        if user.is_anonymous:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
-        queryset = CustomUser.objects.filter(subscribing__user=current_user)
-        paginator = PageNumberPagination()
-        paginator.page_size_query_param = "limit"
+        # queryset = CustomUser.objects.filter(user=user)
+        queryset = CustomUser.objects.filter(subscribing__user=user)
+        # queryset = Subscribtion.objects.filter(user=user)
+        # paginator = PageNumberPagination()
+        # paginator.page_size_query_param = "limit"
         pages = self.paginate_queryset(queryset)
         serializer = SubscribtionsSerializer(
             pages, many=True, context={"request": request}
