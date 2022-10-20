@@ -160,62 +160,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return FileResponse(buf, as_attachment=True, filename="shopping_cart.pdf")
 
 
-    def download_shopping_cart123(self, request):
-        """Качаем список с ингредиентами."""
-        buffer = io.BytesIO()
-        page = canvas.Canvas(buffer)
-        pdfmetrics.registerFont(TTFont('Vera', 'Vera.ttf'))
-        x_position, y_position = 50, 800
-        shopping_cart = (
-            request.user.shopping_cart.recipe.
-            values(
-                'ingredients__name',
-                'ingredients__measurement_unit'
-            ).annotate(amount=Sum('recipe__amount')).order_by())
-        page.setFont('Vera', 14)
-        if shopping_cart:
-            indent = 20
-            page.drawString(x_position, y_position, 'Cписок покупок:')
-            for index, recipe in enumerate(shopping_cart, start=1):
-                page.drawString(
-                    x_position, y_position - indent,
-                    f'{index}. {recipe["ingredients__name"]} - '
-                    f'{recipe["amount"]} '
-                    f'{recipe["ingredients__measurement_unit"]}.')
-                y_position -= 15
-                if y_position <= 50:
-                    page.showPage()
-                    y_position = 800
-            page.save()
-            buffer.seek(0)
-            return FileResponse(
-                buffer, as_attachment=True, filename="shopping_cart.pdf")
-        page.setFont('Vera', 24)
-        page.drawString(
-            x_position,
-            y_position,
-            'Cписок покупок пуст!')
-        page.save()
-        buffer.seek(0)
-        return FileResponse(buffer, as_attachment=True, filename="shopping_cart.pdf")
-
-    def download_shopping_cart56(self, request):
-        ingredients = RecipeIngredients.objects.filter(
-            recipe__shopping_cart__user=request.user
-        ).values(
-            'ingredient__name',
-            'ingredient__measurement_unit'
-        ).annotate(total_amount=Sum('amount'))
-        shopping_list = ['{} ({}) - {}\n'.format(
-            ingredient['ingredient__name'],
-            ingredient['ingredient__measurement_unit'],
-            ingredient['total_amount']
-        ) for ingredient in ingredients]
-        response = HttpResponse(shopping_list, content_type='text/plain')
-        attachment = 'attachment; filename="shopping_list.txt"'
-        response['Content-Disposition'] = attachment
-        return response
-
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
@@ -266,7 +210,7 @@ class CustomUserViewSet(viewsets.ModelViewSet):
             context={"request": request, "author": author},
         )
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        # serializer.save()
         if request.method == "POST":
             author = Subscribtion.objects.create(user=user, author=author)
             return Response(

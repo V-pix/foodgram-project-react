@@ -34,6 +34,14 @@ class RecipeFilter(django_filters.FilterSet):
             return queryset.filter(shopping_cart__user=self.request.user)
         return queryset
     
+    author = filters.CharFilter(method='get_author')
+    
+    def get_author(self, queryset, name, value):
+        if value == "me":
+            return queryset.filtert(author=self.request.user)
+        else:
+            return queryset.filter (author=value)
+        
     
 class IngredientSearchFilter(SearchFilter):
     search_param = 'name'

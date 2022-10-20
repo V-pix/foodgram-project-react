@@ -332,11 +332,11 @@ class ShoppingCartValidSerializer(serializers.ModelSerializer):
 
 
 class SubscribtionsSerializer(serializers.ModelSerializer):
-    id = serializers.ReadOnlyField(source='author.id')
-    email = serializers.ReadOnlyField(source='author.email')
-    username = serializers.ReadOnlyField(source='author.username')
-    first_name = serializers.ReadOnlyField(source='author.first_name')
-    last_name = serializers.ReadOnlyField(source='author.last_name')
+    # id = serializers.ReadOnlyField(source='author.id')
+    # email = serializers.ReadOnlyField(source='author.email')
+    # username = serializers.ReadOnlyField(source='author.username')
+    # first_name = serializers.ReadOnlyField(source='author.first_name')
+    # last_name = serializers.ReadOnlyField(source='author.last_name')
     is_subscribed = serializers.SerializerMethodField(read_only=True)
     recipes = serializers.SerializerMethodField(read_only=True)
     recipes_count = serializers.SerializerMethodField(read_only=True)
@@ -369,13 +369,19 @@ class SubscribtionsSerializer(serializers.ModelSerializer):
     def get_recipes_count(self, obj):
         return Recipe.objects.filter(author=obj).count()
 
-    def get_is_subscribed(self, data):
-        request = self.context.get("request")
-        if request is None or request.user.is_anonymous:
-            return False
+    def get_is_subscribed(self, author):
         return Subscribtion.objects.filter(
-            author=data, user=self.context.get("request").user
+            user=self.context.get('request').user,
+            author=author
         ).exists()
+    
+    # def get_is_subscribed(self, data):
+        # request = self.context.get("request")
+        # if request is None or request.user.is_anonymous:
+            # return False
+        # return Subscribtion.objects.filter(
+            # author=data, user=self.context.get("request").user
+        # ).exists()
 
 
 class SubscribtionRecipeSerializer(serializers.ModelSerializer):
