@@ -1,21 +1,15 @@
-from cgitb import text
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.pagination import PageNumberPagination
-from django.shortcuts import get_object_or_404, get_list_or_404
-from django.core.exceptions import ValidationError
-from django.http import FileResponse, HttpResponse
+from django.shortcuts import get_object_or_404
+from django.http import FileResponse
 import io
 from django.db.models import F, Sum
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.units import inch
 from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import ttfonts
 
 from users.models import CustomUser, Subscribtion
@@ -32,7 +26,6 @@ from api.serializers import (
     RegistrationSerializer,
     SubscribtionValidSerializer,
     SubscribtionsSerializer,
-    SubscribtionRecipeSerializer,
     FavoritesSerializer,
     IngredientSerializer,
     RecipeSerializer,
@@ -57,7 +50,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if self.request.method == "GET":
             return RecipeGetSerializer
         return RecipeSerializer
-    
+
     @action(
         detail=True,
         methods=["POST", "DELETE"],
@@ -95,7 +88,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def shopping_cart(self, request, pk):
         user = request.user
         if user.is_anonymous:
-        # if self.request.user.is_anonimous:
+            # if self.request.user.is_anonimous:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         recipe = get_object_or_404(Recipe, pk=pk)
         data = {"user": request.user.id, "recipe": pk}
@@ -124,17 +117,17 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def download_shopping_cart(self, request):
         buf = io.BytesIO()
         page = canvas.Canvas(buf)
-        arial = ttfonts.TTFont('Arial', 'data/arial.ttf')
+        arial = ttfonts.TTFont("Arial", "data/arial.ttf")
         pdfmetrics.registerFont(arial)
 
         x_position, y_position = 50, 800
-        ingredients = RecipeIngredients.objects.filter(
-            recipe__shopping_cart__user=request.user
-        ).values(
-            'ingredient__name',
-            'ingredient__measurement_unit'
-        ).annotate(total_amount=Sum('amount')).order_by()
-        page.setFont('Arial', 14)
+        ingredients = (
+            RecipeIngredients.objects.filter(recipe__shopping_cart__user=request.user)
+            .values("ingredient__name", "ingredient__measurement_unit")
+            .annotate(total_amount=Sum("amount"))
+            .order_by()
+        )
+        page.setFont("Arial", 14)
         if ingredients:
             indent = 20
             page.drawString(x_position, y_position, "Cписок покупок:")
@@ -153,7 +146,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             page.save()
             buf.seek(0)
             return FileResponse(buf, as_attachment=True, filename="shopping_cart.pdf")
-        page.setFont('Arial', 24)
+        page.setFont("Arial", 24)
         page.drawString(x_position, y_position, "Cписок покупок пуст!")
         page.save()
         buf.seek(0)

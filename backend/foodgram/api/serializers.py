@@ -353,7 +353,7 @@ class SubscribtionsSerializer(serializers.ModelSerializer):
             "recipes",
             "recipes_count",
         )
-        
+
     def get_recipes(self, obj):
         request = self.context.get("request")
         if request is None or request.user.is_anonymous:
@@ -364,32 +364,30 @@ class SubscribtionsSerializer(serializers.ModelSerializer):
             queryset = queryset[: int(recipes_limit)]
         # return RecipeSerializer(queryset, many=True).data
         return SubscribtionRecipeSerializer(queryset, many=True).data
-    
 
     def get_recipes_count(self, obj):
         return Recipe.objects.filter(author=obj).count()
 
     def get_is_subscribed(self, author):
         return Subscribtion.objects.filter(
-            user=self.context.get('request').user,
-            author=author
+            user=self.context.get("request").user, author=author
         ).exists()
-    
+
     # def get_is_subscribed(self, data):
-        # request = self.context.get("request")
-        # if request is None or request.user.is_anonymous:
-            # return False
-        # return Subscribtion.objects.filter(
-            # author=data, user=self.context.get("request").user
-        # ).exists()
+    # request = self.context.get("request")
+    # if request is None or request.user.is_anonymous:
+    # return False
+    # return Subscribtion.objects.filter(
+    # author=data, user=self.context.get("request").user
+    # ).exists()
 
 
 class SubscribtionRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
-        fields = ('id', 'name', 'image', 'cooking_time')
-        
-        
+        fields = ("id", "name", "image", "cooking_time")
+
+
 class SubscribtionValidSerializer(serializers.ModelSerializer):
     queryset = CustomUser.objects.all()
     user = serializers.PrimaryKeyRelatedField(queryset=queryset)
