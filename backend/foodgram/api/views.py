@@ -1,42 +1,44 @@
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, viewsets, status
+import io
+
+from django.db.models import Sum
+from django.http import FileResponse
+from django.shortcuts import get_object_or_404
+
+from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.shortcuts import get_object_or_404
-from django.http import FileResponse
-import io
-from django.db.models import F, Sum
-from reportlab.pdfgen import canvas
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase import ttfonts
 
-from users.models import CustomUser, Subscribtion
-from recipes.models import (
-    Recipe,
-    ShoppingCart,
-    Tag,
-    Ingredient,
-    Favorites,
-    RecipeIngredients,
-)
+from django_filters.rest_framework import DjangoFilterBackend
+from reportlab.pdfbase import pdfmetrics, ttfonts
+from reportlab.pdfgen import canvas
+
+from api.filters import IngredientSearchFilter, RecipeFilter
+from api.pagination import LimitPageNumberPagination
 from api.serializers import (
     CustomUserSerializer,
-    RegistrationSerializer,
-    SubscribtionValidSerializer,
-    SubscribtionsSerializer,
     FavoritesSerializer,
-    IngredientSerializer,
-    RecipeSerializer,
-    RecipeGetSerializer,
-    ShoppingCartSerializer,
-    TagSerializer,
     FavoritesValidSerializer,
+    IngredientSerializer,
+    RecipeGetSerializer,
+    RecipeSerializer,
+    RegistrationSerializer,
+    ShoppingCartSerializer,
     ShoppingCartValidSerializer,
+    SubscribtionsSerializer,
+    SubscribtionValidSerializer,
+    TagSerializer
 )
-from api.filters import RecipeFilter, IngredientSearchFilter
-from api.pagination import LimitPageNumberPagination
+from recipes.models import (
+    Favorites,
+    Ingredient,
+    Recipe,
+    RecipeIngredients,
+    ShoppingCart,
+    Tag
+)
+from users.models import CustomUser, Subscribtion
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -70,14 +72,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         if request.method == "POST":
             recipe = Favorites.objects.create(user=user, recipe=recipe)
-            serializer = FavoritesSerializer(recipe, context={"request": request})
+            serializer = FavoritesSerializer(
+                recipe, context={"request": request}
+            )
             return Response(
                 serializer.to_representation(instance=recipe),
                 status=status.HTTP_201_CREATED,
             )
-        if request.method == "DELETE":
-            Favorites.objects.filter(user=user, recipe=recipe).delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+        # if request.method == "DELETE":
+        Favorites.objects.filter(user=user, recipe=recipe).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=True,
@@ -99,14 +103,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         if request.method == "POST":
             recipe = ShoppingCart.objects.create(user=user, recipe=recipe)
-            serializer = ShoppingCartSerializer(recipe, context={"request": request})
+            serializer = ShoppingCartSerializer(
+                recipe, context={"request": request}
+            )
             return Response(
                 serializer.to_representation(instance=recipe),
                 status=status.HTTP_201_CREATED,
             )
-        if request.method == "DELETE":
-            ShoppingCart.objects.filter(user=user, recipe=recipe).delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+        # if request.method == "DELETE":
+        ShoppingCart.objects.filter(user=user, recipe=recipe).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=False,
@@ -122,7 +128,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         x_position, y_position = 50, 800
         ingredients = (
-            RecipeIngredients.objects.filter(recipe__shopping_cart__user=request.user)
+            RecipeIngredients.objects.filter(
+                recipe__shopping_cart__user=request.user
+            )
             .values("ingredient__name", "ingredient__measurement_unit")
             .annotate(total_amount=Sum("amount"))
             .order_by()
@@ -145,12 +153,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     y_position = 800
             page.save()
             buf.seek(0)
-            return FileResponse(buf, as_attachment=True, filename="shopping_cart.pdf")
+            return FileResponse(
+                buf, as_attachment=True, filename="shopping_cart.pdf"
+            )
         page.setFont("Arial", 24)
         page.drawString(x_position, y_position, "Cписок покупок пуст!")
         page.save()
         buf.seek(0)
-        return FileResponse(buf, as_attachment=True, filename="shopping_cart.pdf")
+        return FileResponse(
+            buf, as_attachment=True, filename="shopping_cart.pdf"
+        )
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -177,7 +189,7 @@ class UserRegistrationView(APIView):
         serializer = RegistrationSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            username = request.data.get("username")
+            # username = request.data.get("username")
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -190,7 +202,9 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     search_fields = ("author__username",)
 
     @action(
-        detail=True, methods=["POST", "DELETE"], permission_classes=[IsAuthenticated]
+        detail=True,
+        methods=["POST", "DELETE"],
+        permission_classes=[IsAuthenticated]
     )
     def subscribe(self, request, pk):
         user = request.user
@@ -203,31 +217,25 @@ class CustomUserViewSet(viewsets.ModelViewSet):
             context={"request": request, "author": author},
         )
         serializer.is_valid(raise_exception=True)
-        # serializer.save()
         if request.method == "POST":
             author = Subscribtion.objects.create(user=user, author=author)
             return Response(
                 serializer.to_representation(instance=author),
                 status=status.HTTP_201_CREATED,
             )
-        if request.method == "DELETE":
-            Subscribtion.objects.filter(user=user, author=author).delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+        #  if request.method == "DELETE":
+        Subscribtion.objects.filter(user=user, author=author).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=False,
         permission_classes=(IsAuthenticated,),
-        # pagination_class = LimitPageNumberPagination
     )
     def subscriptions(self, request):
         user = request.user
         if user.is_anonymous:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
-        # queryset = CustomUser.objects.filter(user=user)
         queryset = CustomUser.objects.filter(subscribing__user=user)
-        # queryset = Subscribtion.objects.filter(user=user)
-        # paginator = PageNumberPagination()
-        # paginator.page_size_query_param = "limit"
         pages = self.paginate_queryset(queryset)
         serializer = SubscribtionsSerializer(
             pages, many=True, context={"request": request}

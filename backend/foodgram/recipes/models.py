@@ -1,6 +1,8 @@
-from colorfield.fields import ColorField
 from django.core.validators import MinValueValidator
 from django.db import models
+
+from colorfield.fields import ColorField
+
 from users.models import CustomUser
 
 
@@ -62,7 +64,8 @@ class Recipe(models.Model):
         verbose_name="Картинка", upload_to="recipes/images/", blank=True
     )
     text = models.TextField(
-        verbose_name="Текстовое описание", help_text="Введите текстовое описание"
+        verbose_name="Текстовое описание",
+        help_text="Введите текстовое описание"
     )
     ingredients = models.ManyToManyField(
         Ingredient,
@@ -83,7 +86,9 @@ class Recipe(models.Model):
         verbose_name="Время приготовления блюда",
         help_text="Укажите время приготовления блюда в минутах",
         validators=[
-            MinValueValidator(1, "Время приготовления не может быть меньше 1 минуты")
+            MinValueValidator(
+                1, "Время приготовления не может быть меньше 1 минуты"
+            )
         ],
     )
     pub_date = models.DateTimeField(
@@ -106,7 +111,9 @@ class RecipeIngredients(models.Model):
         verbose_name="Количество ингредиента",
         help_text="Укажите Количество ингредиента",
         validators=[
-            MinValueValidator(1, "Количество ингридаента не может быть меньше 1 штуки")
+            MinValueValidator(
+                1, "Количество ингридаента не может быть меньше 1 штуки"
+            )
         ],
     )
     ingredient = models.ForeignKey(
@@ -126,7 +133,9 @@ class RecipeIngredients(models.Model):
 
 
 class RecipeTags(models.Model):
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE, related_name="recipe_tags")
+    tag = models.ForeignKey(
+        Tag, on_delete=models.CASCADE, related_name="recipe_tags"
+    )
     recipe = models.ForeignKey(
         Recipe, on_delete=models.CASCADE, related_name="recipe_tags"
     )

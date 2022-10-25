@@ -1,9 +1,10 @@
 import base64
-from djoser.serializers import UserSerializer
-from rest_framework import serializers
 
 from django.core.files.base import ContentFile
+
 from rest_framework import serializers
+
+from djoser.serializers import UserSerializer
 
 from recipes.models import (
     Favorites,
@@ -11,9 +12,8 @@ from recipes.models import (
     Recipe,
     RecipeIngredients,
     ShoppingCart,
-    Tag,
+    Tag
 )
-
 from users.models import CustomUser, Subscribtion
 
 
@@ -55,7 +55,9 @@ class CustomUserSerializer(UserSerializer):
 class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ("email", "id", "username", "first_name", "last_name", "password")
+        fields = (
+            "email", "id", "username", "first_name", "last_name", "password"
+        )
         extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):
@@ -102,7 +104,9 @@ class RecipeIngredientsSerializer(serializers.ModelSerializer):
         queryset=Ingredient.objects.all(), source="ingredient.id"
     )
     name = serializers.ReadOnlyField(source="ingredient.name")
-    measurement_unit = serializers.ReadOnlyField(source="ingredient.measurement_unit")
+    measurement_unit = serializers.ReadOnlyField(
+        source="ingredient.measurement_unit"
+    )
 
     class Meta:
         model = RecipeIngredients
@@ -160,7 +164,9 @@ class RecipeSerializer(serializers.ModelSerializer):
         read_only=True, default=serializers.CurrentUserDefault()
     )
     ingredients = RecipeIngredientsSerializer(many=True)
-    tags = serializers.PrimaryKeyRelatedField(queryset=Tag.objects.all(), many=True)
+    tags = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(), many=True
+    )
     image = Base64ImageField(required=False, allow_null=True)
 
     class Meta:
@@ -269,7 +275,9 @@ class FavoritesSerializer(serializers.ModelSerializer):
 
 class FavoritesValidSerializer(serializers.ModelSerializer):
     recipe = serializers.PrimaryKeyRelatedField(queryset=Recipe.objects.all())
-    user = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
+    user = serializers.PrimaryKeyRelatedField(
+        queryset=CustomUser.objects.all()
+    )
 
     class Meta:
         model = Favorites
@@ -279,10 +287,14 @@ class FavoritesValidSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         user = request.user
         recipe = self.context.get("recipe")
-        favorite_recipe = Favorites.objects.filter(user_id=user, recipe_id=recipe)
+        favorite_recipe = Favorites.objects.filter(
+            user_id=user, recipe_id=recipe
+        )
         if request.method == "POST":
             if favorite_recipe.exists():
-                raise serializers.ValidationError("Рецепт уже добавлен в избранное.")
+                raise serializers.ValidationError(
+                    "Рецепт уже добавлен в избранное."
+                )
         if request.method == "DELETE":
             if not favorite_recipe.exists():
                 raise serializers.ValidationError("Рецепта нет в избранном.")
@@ -321,22 +333,23 @@ class ShoppingCartValidSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         user = request.user
         recipe = data["recipe"]
-        shopping_cart_recipe = ShoppingCart.objects.filter(user=user, recipe=recipe)
+        shopping_cart_recipe = ShoppingCart.objects.filter(
+            user=user, recipe=recipe
+        )
         if request.method == "POST":
             if shopping_cart_recipe.exists():
-                raise serializers.ValidationError("Рецепт уже есть в списке покупок.")
+                raise serializers.ValidationError(
+                    "Рецепт уже есть в списке покупок."
+                )
         if request.method == "DELETE":
             if not shopping_cart_recipe.exists():
-                raise serializers.ValidationError("Этого рецепта нет в списке покупок.")
+                raise serializers.ValidationError(
+                    "Этого рецепта нет в списке покупок."
+                )
         return data
 
 
 class SubscribtionsSerializer(serializers.ModelSerializer):
-    # id = serializers.ReadOnlyField(source='author.id')
-    # email = serializers.ReadOnlyField(source='author.email')
-    # username = serializers.ReadOnlyField(source='author.username')
-    # first_name = serializers.ReadOnlyField(source='author.first_name')
-    # last_name = serializers.ReadOnlyField(source='author.last_name')
     is_subscribed = serializers.SerializerMethodField(read_only=True)
     recipes = serializers.SerializerMethodField(read_only=True)
     recipes_count = serializers.SerializerMethodField(read_only=True)
@@ -362,7 +375,6 @@ class SubscribtionsSerializer(serializers.ModelSerializer):
         queryset = Recipe.objects.filter(author=obj)
         if recipes_limit:
             queryset = queryset[: int(recipes_limit)]
-        # return RecipeSerializer(queryset, many=True).data
         return SubscribtionRecipeSerializer(queryset, many=True).data
 
     def get_recipes_count(self, obj):
@@ -372,14 +384,6 @@ class SubscribtionsSerializer(serializers.ModelSerializer):
         return Subscribtion.objects.filter(
             user=self.context.get("request").user, author=author
         ).exists()
-
-    # def get_is_subscribed(self, data):
-    # request = self.context.get("request")
-    # if request is None or request.user.is_anonymous:
-    # return False
-    # return Subscribtion.objects.filter(
-    # author=data, user=self.context.get("request").user
-    # ).exists()
 
 
 class SubscribtionRecipeSerializer(serializers.ModelSerializer):
@@ -413,7 +417,9 @@ class SubscribtionValidSerializer(serializers.ModelSerializer):
                 )
         if request.method == "DELETE":
             if not follow.exists():
-                raise serializers.ValidationError("Вы не подписаны на этого автора.")
+                raise serializers.ValidationError(
+                    "Вы не подписаны на этого автора."
+                )
         return data
 
     def to_representation(self, instance):
