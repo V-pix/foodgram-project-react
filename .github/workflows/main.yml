@@ -54,4 +54,4 @@ jobs:
         with:
           push: true
           context: ./frontend/
-          tags: ${{ secrets.DOCKER_USERNAME }}/foodgam_front:latest 
+          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_front:latest 
