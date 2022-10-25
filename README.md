@@ -29,3 +29,7 @@ http://localhost
 
 cd frontend
 npm run start
+
+git add .
+git commit -m "Push to Docker Hub"
+git push
