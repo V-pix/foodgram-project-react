@@ -9,14 +9,15 @@ services:
       - ../.env
 
   web:
-    build: ../backend/
+    image: vpix/foodgram:latest
+    # build: ../backend/
     restart: always
     volumes:
       - static_value:/app/static/
       - media_value:/app/media/
-      - ../backend/foodgram/:/app/
-    ports:
-      - 8000:8000
+      # - ../backend/foodgram/:/app/
+    # ports:
+      # - 8000:8000
     depends_on:
       - db
     env_file:
