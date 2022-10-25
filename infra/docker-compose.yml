@@ -23,11 +23,11 @@ services:
       - ../.env
 
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: vpix/foodgram_frontend:v1
     volumes:
       - ../frontend/:/app/result_build/
+    depends_on:
+      - web
 
   nginx:
     image: nginx:1.19.3
