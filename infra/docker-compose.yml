@@ -40,7 +40,6 @@ services:
     depends_on:
       - web
 
-
 volumes:
   static_value:
   media_value:
