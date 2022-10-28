@@ -39,8 +39,7 @@ class RecipeFilter(django_filters.FilterSet):
     def get_author(self, queryset, name, value):
         if value == "me":
             return queryset.filtert(author=self.request.user)
-        else:
-            return queryset.filter(author=value)
+        return queryset.filter(author=value)
 
 
 class IngredientSearchFilter(SearchFilter):
