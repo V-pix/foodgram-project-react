@@ -1,4 +1,3 @@
-# from crypt import methods
 from rest_framework.filters import SearchFilter
 
 import django_filters

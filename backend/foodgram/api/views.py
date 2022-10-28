@@ -79,7 +79,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 serializer.to_representation(instance=recipe),
                 status=status.HTTP_201_CREATED,
             )
-        # if request.method == "DELETE":
         Favorites.objects.filter(user=user, recipe=recipe).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -92,7 +91,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def shopping_cart(self, request, pk):
         user = request.user
         if user.is_anonymous:
-            # if self.request.user.is_anonimous:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         recipe = get_object_or_404(Recipe, pk=pk)
         data = {"user": request.user.id, "recipe": pk}
@@ -110,7 +108,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 serializer.to_representation(instance=recipe),
                 status=status.HTTP_201_CREATED,
             )
-        # if request.method == "DELETE":
         ShoppingCart.objects.filter(user=user, recipe=recipe).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -189,7 +186,6 @@ class UserRegistrationView(APIView):
         serializer = RegistrationSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            # username = request.data.get("username")
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
