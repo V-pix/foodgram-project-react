@@ -411,11 +411,11 @@ class SubscribtionValidSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     "Нельзя подписываться на самого себя."
                 )
-            elif follow.exists():
+            if follow.exists():
                 raise serializers.ValidationError(
                     "Вы уже подписаны на этого пользователя"
                 )
-            return data
+            # return data
         if request.method == "DELETE":
             if not follow.exists():
                 raise serializers.ValidationError(
