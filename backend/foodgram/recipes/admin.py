@@ -6,9 +6,9 @@ from recipes.models import (
     Recipe,
     RecipeIngredients,
     RecipeTags,
-    ShoppingCart,
     Tag
 )
+
 
 
 class IngredientInline(admin.TabularInline):
@@ -59,5 +59,3 @@ class IngredientAdmin(admin.ModelAdmin):
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(Recipe, RecipeAdmin)
-admin.site.register(ShoppingCart)
-admin.site.register(Favorites)
