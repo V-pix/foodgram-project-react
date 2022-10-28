@@ -32,7 +32,6 @@ class RecipeAdmin(admin.ModelAdmin):
         "name",
         "tags",
     )
-    readonly_fields = ("count_favourites",)
     search_fields = ("name", "author", "tags")
     empty_value_display = "-пусто-"
     inlines = [TagInline, IngredientInline]
