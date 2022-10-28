@@ -10,7 +10,6 @@ from recipes.models import (
 )
 
 
-
 class IngredientInline(admin.TabularInline):
     model = RecipeIngredients
     extra = 1
