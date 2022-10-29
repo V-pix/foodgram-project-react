@@ -169,12 +169,18 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Ingredient.objects.all()
+    # queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     filterset_class = IngredientFilter
     # filterset_class = IngredientNameFilter
     # search_fields = ("^name",)
     pagination_class = None
+    
+    def get_queryset(self):
+        name = self.request.GET.get('name')
+        if name:
+            return Ingredient.objects.filter(name__istartswith=name)
+        return Ingredient.objects.all()
 
 
 class UserRegistrationView(APIView):
