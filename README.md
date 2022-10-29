@@ -1,6 +1,6 @@
 # Foodgram - сайт 'Продуктовый помощник'
 
-[workflow](https://github.com/V-pix/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)
+[workflow](https://github.com/V-pix/foodgram-project-react/actions/workflows/main.yml/badge.svg)
 
 IP 51.250.16.171
 
