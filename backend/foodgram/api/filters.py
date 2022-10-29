@@ -43,7 +43,7 @@ class RecipeFilter(django_filters.FilterSet):
     # search_param = "name"
 
 class IngredientNameFilter(django_filters.FilterSet):
-    name = django_filters.CharFilter(
+    name = filters.CharFilter(
         field_name='name', lookup_expr='istartswith'
     )
 
