@@ -39,9 +39,6 @@ class RecipeFilter(django_filters.FilterSet):
         return queryset.filter(author=value)
 
 
-# class IngredientSearchFilter(SearchFilter):
-    # search_param = "name"
-
 class IngredientFilter(FilterSet):
     name = filters.CharFilter(
         field_name='name', lookup_expr='istartswith'
@@ -50,12 +47,3 @@ class IngredientFilter(FilterSet):
     class Meta:
         model = Ingredient
         fields = ('name',)
-
-# class IngredientNameFilter(django_filters.FilterSet):
-    # name = filters.CharFilter(
-        # field_name='name', lookup_expr='istartswith'
-    # )
-
-    # class Meta:
-        # model = Ingredient
-        # fields = ('name',)

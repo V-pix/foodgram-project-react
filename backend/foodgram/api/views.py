@@ -169,11 +169,8 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
-    # queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     filterset_class = IngredientFilter
-    # filterset_class = IngredientNameFilter
-    # search_fields = ("^name",)
     pagination_class = None
 
     def get_queryset(self):
