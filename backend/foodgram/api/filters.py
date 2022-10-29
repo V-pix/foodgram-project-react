@@ -44,18 +44,18 @@ class RecipeFilter(django_filters.FilterSet):
 
 class IngredientFilter(FilterSet):
     name = filters.CharFilter(
-        field_name='name',lookup_expr='istartswith'
+        field_name='name', lookup_expr='istartswith'
     )
 
     class Meta:
         model = Ingredient
-        fields = ('name',) 
-        
+        fields = ('name',)
+
 # class IngredientNameFilter(django_filters.FilterSet):
     # name = filters.CharFilter(
         # field_name='name', lookup_expr='istartswith'
     # )
 
     # class Meta:
-       #  model = Ingredient
+        # model = Ingredient
         # fields = ('name',)

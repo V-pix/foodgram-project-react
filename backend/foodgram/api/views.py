@@ -175,7 +175,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     # filterset_class = IngredientNameFilter
     # search_fields = ("^name",)
     pagination_class = None
-    
+
     def get_queryset(self):
         name = self.request.GET.get('name')
         if name:
