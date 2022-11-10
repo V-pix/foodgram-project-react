@@ -223,7 +223,6 @@ class CustomUserViewSet(viewsets.ModelViewSet):
                 serializer.to_representation(instance=author),
                 status=status.HTTP_201_CREATED,
             )
-        #  if request.method == "DELETE":
         Subscribtion.objects.filter(user=user, author=author).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -240,4 +239,5 @@ class CustomUserViewSet(viewsets.ModelViewSet):
         serializer = SubscribtionsSerializer(
             pages, many=True, context={"request": request}
         )
+        # test
         return self.get_paginated_response(serializer.data)
