@@ -239,5 +239,4 @@ class CustomUserViewSet(viewsets.ModelViewSet):
         serializer = SubscribtionsSerializer(
             pages, many=True, context={"request": request}
         )
-        # test
         return self.get_paginated_response(serializer.data)
